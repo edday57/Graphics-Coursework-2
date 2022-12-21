@@ -21,6 +21,7 @@
 #include "ShaderProgram2.h"
 #include "Camera.h"
 #include "Mesh.h"
+#include "SimpleMesh.h"
 namespace
 {
 	constexpr char const* kWindowTitle = "COMP3811 - Coursework 2";
@@ -245,16 +246,15 @@ int main() try
 	};
 
 	//Load Meshes
-	const int numModels = 3;
+	const int numModels = 2;
 	Mesh mesh[numModels];
-	Texture2D texture[numModels];
+	Texture2D texture[numModels+1];
 	mesh[0].loadOBJ("models/tank1.obj");
 	mesh[1].loadOBJ("models/crate.obj");
-	mesh[2].loadOBJ("models/FantasyHouse.obj");
 
 	texture[0].loadTexture("textures/tank1.jpg", true);
 	texture[1].loadTexture("textures/crate.jpg", true);
-	texture[2].loadTexture("textures/FantasyHouse.png", true);
+	texture[2].loadTexture("textures/watchtower.jpg", true);
 
 
 
@@ -264,6 +264,10 @@ int main() try
 	texture2.loadTexture(texture2File, true);
 
 	OGL_CHECKPOINT_ALWAYS();
+
+	SimpleMeshData armadillo = load_wavefront_obj("assets/Armadillo.obj");
+	GLuint vaoObj = create_vao(armadillo);
+	std::size_t vertexCountObj = armadillo.positions.size();
 
 	// Main loop
 	while( !glfwWindowShouldClose( window ) )
@@ -354,6 +358,13 @@ int main() try
 			mesh[i].draw();
 			texture[i].unbind(0);
 		}
+		shaderProg.setUniform("model", model);
+		texture[2].bind(0);
+		model = kIdentity44f;
+		glBindVertexArray(vaoObj);
+		glDrawArrays(GL_TRIANGLES, 0, vertexCountObj);
+		texture[2].unbind(0);
+
 
 		glUseProgram(0);
 
