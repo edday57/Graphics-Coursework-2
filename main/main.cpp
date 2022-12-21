@@ -209,8 +209,8 @@ int main() try
 	
 
 	// Texture Coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); //5 stride, 3 float offset
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); //5 stride, 3 float offset
+	glEnableVertexAttribArray(2);
 
 	//glGenBuffers(1, &ibo);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -227,35 +227,37 @@ int main() try
 
 	//Model Positions
 	Vec3f modelPos[] = {
-		Vec3f{-2.5f,-1.0f,5.0f}, //tank
-		Vec3f{4.5f,-0.5f,-2.0f}, //crate
-		Vec3f{3.5f,-2.0f,10.0f}
+		Vec3f{-2.5f,-2.0f,5.0f}, //tank
+		Vec3f{10.5f,-1.1f,-2.0f}, //house
+		Vec3f{3.5f,-1.0f,10.0f}
 	};
 
 	//Model scale
 	Vec3f modelScale[] = {
 		Vec3f{1.f, 1.f, 1.f}, //tank
-		Vec3f{0.5f, 0.5f, 0.5f}, //crate
+		Vec3f{0.1f, 0.1f, 0.1f}, //crate
 		Vec3f{1.f, 1.f, 1.f}
 	};
 
 	Vec3f modelRotation[] = {
-		Vec3f{90.0f, 180.0f, 180.0f}, //tank
+		Vec3f{0.0f, 0.0f, 0.0f}, //tank
 		Vec3f{0.0f, 0.0f, 0.0f}, //crate
 		Vec3f{0.0f, 0.0f, 0.0f}
 	};
 
 	//Load Meshes
-	const int numModels = 2;
+	const int numModels = 3;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels+1];
-	mesh[0].loadOBJ("models/tank1.obj");
-	mesh[1].loadOBJ("models/crate.obj");
+	mesh[0].loadOBJ("models/watchtower.obj");
+	mesh[1].loadOBJ("models/Snow covered CottageOBJ.obj");
+	mesh[2].loadOBJ("models/watchtower.obj");
 
-	texture[0].loadTexture("textures/tank1.jpg", true);
-	texture[1].loadTexture("textures/crate.jpg", true);
+	//texture[0].loadTexture("textures/tank1.jpg", true);
+	//texture[1].loadTexture("textures/crate.jpg", true);
+	texture[0].loadTexture("textures/watchtower.jpg", true);
+	texture[1].loadTexture("textures/Cottage Texture.jpg", true);
 	texture[2].loadTexture("textures/watchtower.jpg", true);
-
 
 
 	Texture2D texture1;
@@ -352,18 +354,18 @@ int main() try
 		//Unbind VAO
 		glBindVertexArray(0);
 		for (int i = 0; i < numModels; i++) {
-			model = kIdentity44f * make_scaling(modelScale[i].x, modelScale[i].y, modelScale[i].z) * make_translation(modelPos[i]) * make_rotation_x(makeRadians(modelRotation[i].x))*make_rotation_y(makeRadians(modelRotation[i].y))* make_rotation_z(makeRadians(modelRotation[i].z));
+			model = kIdentity44f * make_translation(modelPos[i]) * make_scaling(modelScale[i].x, modelScale[i].y, modelScale[i].z)  * make_rotation_x(makeRadians(modelRotation[i].x))*make_rotation_y(makeRadians(modelRotation[i].y))* make_rotation_z(makeRadians(modelRotation[i].z));
 			shaderProg.setUniform("model", model);
 			texture[i].bind(0);
 			mesh[i].draw();
 			texture[i].unbind(0);
 		}
 		shaderProg.setUniform("model", model);
-		texture[2].bind(0);
-		model = kIdentity44f;
-		glBindVertexArray(vaoObj);
-		glDrawArrays(GL_TRIANGLES, 0, vertexCountObj);
-		texture[2].unbind(0);
+		//texture[2].bind(0);
+		//model = kIdentity44f;
+		//glBindVertexArray(vaoObj);
+		//glDrawArrays(GL_TRIANGLES, 0, vertexCountObj);
+		//texture[2].unbind(0);
 
 
 		glUseProgram(0);

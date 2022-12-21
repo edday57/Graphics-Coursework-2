@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <rapidobj/rapidobj.hpp>
+#include "../support/error.hpp"
 
 Mesh::Mesh()
 	:mLoaded(false)
@@ -11,113 +13,101 @@ Mesh::Mesh()
 
 Mesh::~Mesh() 
 {
-	glDeleteVertexArrays(1, &mVAO);
-	glDeleteBuffers(1, &mVBO);
+	glDeleteVertexArrays(1, &mvao);
+	glDeleteBuffers(1, &mvbo);
+	glDeleteBuffers(1, &mvbocol);
+	glDeleteBuffers(1, &mvbotex);
 }
 
-bool Mesh::loadOBJ(const std::string& filename)
+bool Mesh::loadOBJ(char const* aPath)
 {
-	std::vector<unsigned int> vertexIndices, uvIndices;
-	std::vector<Vec3f> tempVertices;
-	std::vector<Vec2f> tempUVs;
+	//return {};
+		// Ask rapidobj to load the requested file
+	auto result = rapidobj::ParseFile(aPath);
+	if (result.error)
+		throw Error("Unable to load OBJ file ’%s’: %s", aPath, result.error.code.message().c_str());
+	// OBJ files can define faces that are not triangles. However, OpenGL will only render triangles (and lines
+	// and points), so we must triangulate any faces that are not already triangles. Fortunately, rapidobj can do
+	// this for us.
+	rapidobj::Triangulate(result);
 
-	if (filename.find(".obj") != std::string::npos)
-	{
-		std::ifstream fin(filename, std::ios::in);
-		if (!fin)
-		{
-			std::cerr << "Cannot open " << filename << std::endl;
-			return false;
- 		}
-		std::cout << "Loading OBJ file " << filename << "..." << std::endl;
-		std::string lineBuffer;
-		while (std::getline(fin, lineBuffer))
-		{
-			if (lineBuffer.substr(0, 2) == "v ") {
-				std::istringstream v(lineBuffer.substr(2));
-				Vec3f vertex;
-				v >> vertex.x; v >> vertex.y; v >> vertex.z;
-				tempVertices.push_back(vertex);
-			}
-			else if (lineBuffer.substr(0, 2) == "vt") {
-				std::istringstream vt(lineBuffer.substr(3));
-				Vec2f uv;
-				vt >> uv.x; vt >> uv.y;
-				tempUVs.push_back(uv);
-			}
-			else if (lineBuffer.substr(0, 2) == "f ") 
-			{
-				int p1, p2, p3;
-				int t1, t2, t3;
-				int n1, n2, n3;
-				const char* face = lineBuffer.c_str();
-				int match = sscanf_s(face, "f %i/%i/%i %i/%i/%i %i/%i/%i",
-					&p1, &t1, &n1,
-					&p2, &t2, &n2,
-					&p3, &t3, &n3);
-				if (match != 9) 
-					std::cout << "Failed to parse OBJ file" << std::endl;
+	// Convert the OBJ data into a SimpleMeshData structure. For now, we simply turn the object into a triangle
+	// soup, ignoring the indexing information that the OBJ file contains.
 
-				vertexIndices.push_back(p1);
-				vertexIndices.push_back(p2);
-				vertexIndices.push_back(p3);
+	for (auto const& shape : result.shapes) {
+		for (std::size_t i = 0; i < shape.mesh.indices.size(); ++i) {
+			auto const& idx = shape.mesh.indices[i];
 
-				uvIndices.push_back(t1);
-				uvIndices.push_back(t2);
-				uvIndices.push_back(t3);
-				}
-			}
-			fin.close();
+			positions.emplace_back(Vec3f{
+				result.attributes.positions[idx.position_index * 3 + 0],
+				result.attributes.positions[idx.position_index * 3 + 1],
+				result.attributes.positions[idx.position_index * 3 + 2]
+				});
+			textures.emplace_back(Vec2f{
+				result.attributes.texcoords[idx.texcoord_index * 2 + 0],
+				result.attributes.texcoords[idx.texcoord_index * 2 + 1]
+				});
 
-			for (unsigned int i = 0; i < vertexIndices.size(); i++)
-			{
-				Vec3f vertex = tempVertices[vertexIndices[i] - 1];
-				Vec2f uv = tempUVs[uvIndices[i] - 1];
-
-				Vertex meshVertex; 
-				meshVertex.position = vertex;
-				meshVertex.texCoords = uv;
-				mVertices.push_back(meshVertex);
-			}
-			initBuffers();
-			return (mLoaded = true);
+			// Always triangles, so we can find the face index by dividing the vertex index by three
+			auto const& mat = result.materials[shape.mesh.material_ids[i / 3]];
+			// Just replicate the material ambient color for each vertex...
+			colors.emplace_back(Vec3f{
+				mat.ambient[0],
+				mat.ambient[1],
+				mat.ambient[2]
+				});
 		}
-	
-	return false;
+	}
+	initBuffers();
+	mLoaded = true;
+
+	return true;
 }
 void Mesh::draw()
 {
 	if (!mLoaded) return;
 
-	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, mVertices.size());
+	glBindVertexArray(mvao);
+	glDrawArrays(GL_TRIANGLES, 0, positions.size());
 	glBindVertexArray(0);
 }
 
 void Mesh::initBuffers() {
-	//Position and tex
-	glGenBuffers(1, &mVBO); //create buffer
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW); //Move to GPU
+	//Position 
+	glGenBuffers(1, &mvbo);
+	glBindBuffer(GL_ARRAY_BUFFER, mvbo);
+	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(Vec3f), positions.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &mvbocol);
+	glBindBuffer(GL_ARRAY_BUFFER, mvbocol);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(Vec3f), colors.data(), GL_STATIC_DRAW);
+
+	glGenBuffers(1, &mvbotex);
+	glBindBuffer(GL_ARRAY_BUFFER, mvbotex);
+	glBufferData(GL_ARRAY_BUFFER, textures.size() * sizeof(Vec2f), textures.data(), GL_STATIC_DRAW);
 
 
 	//glGenBuffers(1, &vbo2); //create buffer
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo2); // bind buffer
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_color), vertex_color, GL_STATIC_DRAW); //Move to GPU
 
-	glGenVertexArrays(1, &mVAO); //create vao
-	glBindVertexArray(mVAO); //bind vao
+	glGenVertexArrays(1, &mvao); //create vao
+	glBindVertexArray(mvao); //bind vao
 
 	// Position attribute
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind buffer
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, mvbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
-
-
-	// Texture Coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat))); //5 stride, 3 float offset
+	//Color
+	glBindBuffer(GL_ARRAY_BUFFER, mvbocol);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(1);
+
+	//Texture
+	glBindBuffer(GL_ARRAY_BUFFER, mvbotex);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
 
 	glBindVertexArray(0);
 }

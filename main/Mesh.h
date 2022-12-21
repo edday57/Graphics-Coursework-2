@@ -17,16 +17,17 @@ public:
 		Mesh();
 		~Mesh();
 
-		bool loadOBJ(const std::string& filename);
+		bool loadOBJ(char const* aPath);
 		void draw();
 
 private:
 	void initBuffers();
 
 	bool mLoaded;
-	std::vector<Vertex> mVertices;
-
-	GLuint  mVBO, mVAO;
+	std::vector<Vec3f> positions;
+	std::vector<Vec3f> colors;
+	std::vector<Vec2f> textures;
+	GLuint mvbo, mvbocol, mvbotex, mvao;
 
 };
 
