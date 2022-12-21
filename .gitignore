@@ -1,0 +1,14 @@
+*.tlog
+*.log
+*.idb
+*.tlog
+bin/
+tmp/
+*.tmp
+*.bak
+*.vsidx
+*.ipch
+_build_/
+*.vcxproj
+*.pdb
+*.vcxproj.user
