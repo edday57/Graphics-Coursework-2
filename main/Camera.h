@@ -16,6 +16,7 @@ public:
 
 	float getFOV() const { return mFOV; }
 	void setFOV(float fov) { mFOV = fov; }
+	const Vec3f getPos() const;
 
 protected:
 	Camera();

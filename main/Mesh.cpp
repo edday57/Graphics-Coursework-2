@@ -17,13 +17,15 @@ Mesh::~Mesh()
 	glDeleteBuffers(1, &mvbo);
 	glDeleteBuffers(1, &mvbocol);
 	glDeleteBuffers(1, &mvbotex);
+	glDeleteBuffers(1, &mvbonormal);
 }
 
 bool Mesh::loadOBJ(char const* aPath)
 {
 	//return {};
 		// Ask rapidobj to load the requested file
-	auto result = rapidobj::ParseFile(aPath);
+	rapidobj::MaterialLibrary mtllib = rapidobj::MaterialLibrary::Default(rapidobj::Load::Optional);
+	auto result = rapidobj::ParseFile(aPath, mtllib);
 	if (result.error)
 		throw Error("Unable to load OBJ file ’%s’: %s", aPath, result.error.code.message().c_str());
 	// OBJ files can define faces that are not triangles. However, OpenGL will only render triangles (and lines
@@ -46,6 +48,11 @@ bool Mesh::loadOBJ(char const* aPath)
 			textures.emplace_back(Vec2f{
 				result.attributes.texcoords[idx.texcoord_index * 2 + 0],
 				result.attributes.texcoords[idx.texcoord_index * 2 + 1]
+				});
+			normals.emplace_back(Vec3f{
+				result.attributes.normals[idx.normal_index * 3 + 0],
+				result.attributes.normals[idx.normal_index * 3 + 1],
+				result.attributes.normals[idx.normal_index * 3 + 2]
 				});
 
 			// Always triangles, so we can find the face index by dividing the vertex index by three
@@ -86,6 +93,10 @@ void Mesh::initBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, mvbotex);
 	glBufferData(GL_ARRAY_BUFFER, textures.size() * sizeof(Vec2f), textures.data(), GL_STATIC_DRAW);
 
+	glGenBuffers(1, &mvbonormal);
+	glBindBuffer(GL_ARRAY_BUFFER, mvbonormal);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vec3f), normals.data(), GL_STATIC_DRAW);
+
 
 	//glGenBuffers(1, &vbo2); //create buffer
 	//glBindBuffer(GL_ARRAY_BUFFER, vbo2); // bind buffer
@@ -108,6 +119,10 @@ void Mesh::initBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, mvbotex);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mvbonormal);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(3);
 
 	glBindVertexArray(0);
 }

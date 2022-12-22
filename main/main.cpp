@@ -114,150 +114,70 @@ int main() try
 	// Other initialization & loading
 	OGL_CHECKPOINT_ALWAYS();
 
-
-	GLfloat vertex_position[] = {
-		// position		 // tex coords
-
-	   // front face
-	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-		1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
-	   -1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-	   -1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
-		1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-
-		// back face
-		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		 1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-		-1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		-1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		 1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-
-		 // left face
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-		 -1.0f,  1.0f,  1.0f, 1.0f, 1.0f,
-		 -1.0f,  1.0f, -1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		 -1.0f, -1.0f,  1.0f, 1.0f, 0.0f,
-
-		 // right face
-		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		  1.0f,  1.0f, -1.0f, 1.0f, 1.0f,
-		  1.0f,  1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f,  1.0f, 0.0f, 0.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-
-		  // top face
-		 -1.0f,  1.0f, -1.0f, 0.0f, 8.0f,
-		  1.0f,  1.0f,  1.0f, 8.0f, 0.0f,
-		  1.0f,  1.0f, -1.0f, 8.0f, 8.0f,
-		 -1.0f,  1.0f, -1.0f, 0.0f, 8.0f,
-		 -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
-		  1.0f,  1.0f,  1.0f, 8.0f, 0.0f,
-
-		  // bottom face
-		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-		  1.0f, -1.0f,  1.0f, 1.0f, 1.0f,
-		 -1.0f, -1.0f,  1.0f, 0.0f, 1.0f,
-		 -1.0f, -1.0f, -1.0f, 0.0f, 0.0f,
-		  1.0f, -1.0f, -1.0f, 1.0f, 0.0f,
-	};
-
-	Vec3f cubePos = { 0.0f, 0.0f, -2.0f };
-	Vec3f floorPos = { 0.0f, -1.0f, 0.0f };
-	float cubeAngle = 0.0f;
 	double lastTime = glfwGetTime();
-
-	GLfloat vertex_color[] = {
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f
-	};
-
-	GLuint indices[] = {
-		0, 1, 2,  // First Triangle
-		0, 2, 3   // Second Triangle
-	};
+	float angle = 0.0f;
 
 
 
-	//Create buffers
-	GLuint vbo, vao;
-
-	//Position and tex
-	glGenBuffers(1, &vbo); //create buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_position), vertex_position, GL_STATIC_DRAW); //Move to GPU
-
-
-	//glGenBuffers(1, &vbo2); //create buffer
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo2); // bind buffer
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_color), vertex_color, GL_STATIC_DRAW); //Move to GPU
-
-	glGenVertexArrays(1, &vao); //create vao
-	glBindVertexArray(vao); //bind vao
-
-	// Position attribute
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo); // bind buffer
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(0);
-
-	
-
-	// Texture Coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat))); //5 stride, 3 float offset
-	glEnableVertexAttribArray(2);
-
-	//glGenBuffers(1, &ibo);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	//Color attribute
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo2); // bind buffer
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)(0));
-	//glEnableVertexAttribArray(1);
 
 	ShaderProgram2 shaderProg;
-	shaderProg.loadShaders("assets/default.vert", "assets/default.frag");
+	shaderProg.loadShaders("assets/directionalLighting.vert", "assets/directionalLighting.frag");
 
+	ShaderProgram2 lightProg;
+	lightProg.loadShaders("assets/lighting.vert", "assets/lighting.frag");
 
 	//Model Positions
 	Vec3f modelPos[] = {
-		Vec3f{-2.5f,-2.0f,5.0f}, //tank
-		Vec3f{10.5f,-1.1f,-2.0f}, //house
-		Vec3f{3.5f,-1.0f,10.0f}
+		Vec3f{5.5f,-1.4f,-13.0f}, //tank
+		Vec3f{-10.5f,-.0f,-10.0f}, //house
+		Vec3f{-6.5f,-.0f,-5.5f}, //diamond ore
+		Vec3f{ 0.0f, -.0f, -2.0f }, //crate
+		Vec3f{ 0.0f, .0f, 0.0f } //floor
 	};
 
 	//Model scale
 	Vec3f modelScale[] = {
-		Vec3f{1.f, 1.f, 1.f}, //tank
-		Vec3f{0.1f, 0.1f, 0.1f}, //crate
-		Vec3f{1.f, 1.f, 1.f}
+		Vec3f{1.5f, 1.5f, 1.5f}, //tank
+		Vec3f{.6f, .6f, .6f}, //crate
+		Vec3f{1.f, 1.f, 1.f},  //diamond ore
+		Vec3f{1.f, 1.f, 1.f},
+		Vec3f{30.f, 1.f, 30.f} //floor
 	};
 
 	Vec3f modelRotation[] = {
-		Vec3f{0.0f, 0.0f, 0.0f}, //tank
-		Vec3f{0.0f, 0.0f, 0.0f}, //crate
+		Vec3f{0.0f, -15.0f, 0.0f}, //tank
+		Vec3f{0.0f, 32.0f, 0.0f}, //crate
+		Vec3f{0.0f, 34.0f, 0.0f},
+		Vec3f{0.0f, 0.0f, 0.0f},
 		Vec3f{0.0f, 0.0f, 0.0f}
 	};
 
 	//Load Meshes
-	const int numModels = 3;
+	const int numModels = 5;
 	Mesh mesh[numModels];
-	Texture2D texture[numModels+1];
+	Texture2D texture[numModels];
 	mesh[0].loadOBJ("models/watchtower.obj");
-	mesh[1].loadOBJ("models/Snow covered CottageOBJ.obj");
-	mesh[2].loadOBJ("models/watchtower.obj");
+	mesh[1].loadOBJ("models/cottage_obj.obj");
+	mesh[2].loadOBJ("models/crate.obj");
+	mesh[3].loadOBJ("models/woodcrate.obj");
+	mesh[4].loadOBJ("models/floor.obj");
 
 	//texture[0].loadTexture("textures/tank1.jpg", true);
 	//texture[1].loadTexture("textures/crate.jpg", true);
 	texture[0].loadTexture("textures/watchtower.jpg", true);
-	texture[1].loadTexture("textures/Cottage Texture.jpg", true);
-	texture[2].loadTexture("textures/watchtower.jpg", true);
+	texture[1].loadTexture("textures/cottage_diffuse.png", true);
+	texture[2].loadTexture("textures/diamondore.png", true);
+	texture[3].loadTexture("textures/woodcrate_diffuse.jpg", true);
+	texture[4].loadTexture("textures/crackedSand.jpg", true);
+	
+
+	//Lighting
+	Mesh lightMesh;
+	lightMesh.loadOBJ("models/light.obj");
+	Vec3f lightPos = { -5.f, 5.5f, 2.f };
+	Vec3f lightCol = { 1.f, 1.f, 1.f };
+	Vec3f liightDirection = { 0.f, -0.9f, -0.17f };
+
 
 
 	Texture2D texture1;
@@ -267,9 +187,9 @@ int main() try
 
 	OGL_CHECKPOINT_ALWAYS();
 
-	SimpleMeshData armadillo = load_wavefront_obj("assets/Armadillo.obj");
-	GLuint vaoObj = create_vao(armadillo);
-	std::size_t vertexCountObj = armadillo.positions.size();
+	//SimpleMeshData armadillo = load_wavefront_obj("assets/Armadillo.obj");
+	//GLuint vaoObj = create_vao(armadillo);
+	//std::size_t vertexCountObj = armadillo.positions.size();
 
 	// Main loop
 	while( !glfwWindowShouldClose( window ) )
@@ -277,6 +197,9 @@ int main() try
 
 		double currentTime = glfwGetTime();
 		double deltaTime = currentTime - lastTime;
+
+		angle += (float)deltaTime * 50.0f;
+		lightPos.x = 8.0f * sinf(makeRadians(angle)) + 5.f;  // slide back and forth
 		// Let GLFW process events
 		glfwPollEvents();
 		
@@ -309,18 +232,15 @@ int main() try
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		texture1.bind(0);
-		//texture2.bind(1);
-		cubeAngle += (float)(deltaTime * 20.0f);
-		if (cubeAngle >= 360) cubeAngle = 0.0f;
+
 
 		Mat44f model(kIdentity44f), view(kIdentity44f), projection(kIdentity44f);
 
-		orbitCam.setLookAt(cubePos);
-		orbitCam.rotate(gYaw, gPitch);
-		orbitCam.setRadius(gRadius);
+		//orbitCam.setLookAt(cubePos);
+		//orbitCam.rotate(gYaw, gPitch);
+		//orbitCam.setRadius(gRadius);
 
-		model = model*make_translation(cubePos);
+
 
 		//Orbit Cam
 		//view = orbitCam.getViewMatrix();
@@ -330,37 +250,55 @@ int main() try
 		view = fpsCamera.getViewMatrix();
 		projection = make_perspective_projection(makeRadians(fpsCamera.getFOV()), fbwidth / float(fbheight), 0.1f, 100.0f);
 		
+		Vec3f viewPos;
+		viewPos.x= fpsCamera.getPos().x;
+		viewPos.y = fpsCamera.getPos().y;
+		viewPos.z = fpsCamera.getPos().z;
+		viewPos = { 0.f,0.f,0.f };
 		//Use Shader
 		//glUseProgram(prog.programId());
 		shaderProg.use();
 		shaderProg.setUniform("model", model);
 		shaderProg.setUniform("view", view);
 		shaderProg.setUniform("projection", projection);
+		shaderProg.setUniform("viewPos", viewPos);
+
+		shaderProg.setUniform("light.ambient", Vec3f{0.5f,0.5f,0.5f});
+		shaderProg.setUniform("light.diffuse", lightCol);
+		shaderProg.setUniform("light.specular", Vec3f{ .5f,0.5f,0.5f });
+		shaderProg.setUniform("light.position", lightPos);
 		//glUniform1i(glGetUniformLocation(shaderProg.getProgram(), "myTexture"), 0);
 		//glUniform1i(glGetUniformLocation(shaderProg.getProgram(), "myTexture2"), 1);
 		//shaderProg.setUniform("vertColor", Vec4f{ 0.8f, 0.6f, 0.2f, 1.0f });
 		
-		//Bind vao
-		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		
-
-		texture2.bind(0);
-		model = model * make_translation(floorPos) * make_scaling(100.0f, 0.01f, 100.f);
-		shaderProg.setUniform("model", model);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		//Unbind VAO
-		glBindVertexArray(0);
+		//Model loading
 		for (int i = 0; i < numModels; i++) {
-			model = kIdentity44f * make_translation(modelPos[i]) * make_scaling(modelScale[i].x, modelScale[i].y, modelScale[i].z)  * make_rotation_x(makeRadians(modelRotation[i].x))*make_rotation_y(makeRadians(modelRotation[i].y))* make_rotation_z(makeRadians(modelRotation[i].z));
+			model = kIdentity44f * make_translation(modelPos[i]) * make_scaling(modelScale[i].x, modelScale[i].y, modelScale[i].z) * make_rotation_x(makeRadians(modelRotation[i].x)) * make_rotation_y(makeRadians(modelRotation[i].y)) * make_rotation_z(makeRadians(modelRotation[i].z));
 			shaderProg.setUniform("model", model);
+
+			shaderProg.setUniform("material.ambient", Vec3f{0.2f,0.2f,0.2f});
+			shaderProg.setUniformSampler("material.diffuseMap", 0);
+			shaderProg.setUniform("material.specular", Vec3f{ 0.5f,0.5f,0.5f });
+			shaderProg.setUniform("material.shininess", 30.f);
 			texture[i].bind(0);
 			mesh[i].draw();
 			texture[i].unbind(0);
 		}
-		shaderProg.setUniform("model", model);
+		
+
+
+
+		model = kIdentity44f * make_translation(lightPos);
+		lightProg.use();
+		lightProg.setUniform("lightColor", lightCol);
+		lightProg.setUniform("view", view);
+		lightProg.setUniform("model", model);
+		lightProg.setUniform("projection", projection);
+		lightMesh.draw();
+
+
+
 		//texture[2].bind(0);
 		//model = kIdentity44f;
 		//glBindVertexArray(vaoObj);
@@ -379,8 +317,7 @@ int main() try
 		lastTime = currentTime;
 	}
 
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
+
 	return 0;
 }
 catch( std::exception const& eErr )
@@ -406,7 +343,7 @@ namespace
 			glfwSetWindowShouldClose( aWindow, GLFW_TRUE );
 			return;
 		}
-		if (GLFW_KEY_Q == aKey && GLFW_PRESS == aAction)
+		if (GLFW_KEY_Z == aKey && GLFW_PRESS == aAction)
 		{
 			gWireframe = !gWireframe;
 			if (gWireframe) {
@@ -467,9 +404,9 @@ namespace
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getRight());
 		//Up/down
-		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getUp());
-		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getUp());
 	}
 
@@ -543,7 +480,7 @@ namespace
 
 		// TODO: global GL setup goes here
 		glEnable(GL_FRAMEBUFFER_SRGB);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(0.1f, 0.1f, 0.2f, 0.0f);
 		glViewport(0, 0, gWindowWidth, gWindowHeight);

@@ -22,6 +22,10 @@ GLuint create_vao(SimpleMeshData aMeshData)
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbocol);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.colors.size() * sizeof(Vec3f), aMeshData.colors.data(), GL_STATIC_DRAW);
 
+	glGenBuffers(1, &(aMeshData.mvbonormal));
+	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbonormal);
+	glBufferData(GL_ARRAY_BUFFER, aMeshData.normals.size() * sizeof(Vec3f), aMeshData.normals.data(), GL_STATIC_DRAW);
+
 	glGenBuffers(1, &(aMeshData.mvbotex));
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbotex);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.textures.size() * sizeof(Vec2f), aMeshData.textures.data(), GL_STATIC_DRAW);
@@ -59,6 +63,15 @@ GLuint create_vao(SimpleMeshData aMeshData)
 	);
 	glEnableVertexAttribArray(2);
 
+	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbonormal);
+	glVertexAttribPointer(
+		3, // location = 1 in vertex shader
+		3, GL_FLOAT, GL_FALSE, // 3 floats, not normalized to [0..1] (GL FALSE)
+		0, // see above
+		0 // see above
+	);
+	glEnableVertexAttribArray(3);
+
 	// Reset state
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -75,7 +88,9 @@ SimpleMeshData load_wavefront_obj(char const* aPath)
 {
 	//return {};
 	// Ask rapidobj to load the requested file
-	auto result = rapidobj::ParseFile(aPath);
+	rapidobj::MaterialLibrary mtllib = rapidobj::MaterialLibrary::Default(rapidobj::Load::Optional);
+
+	auto result = rapidobj::ParseFile(aPath, mtllib);
 	if (result.error)
 		throw Error("Unable to load OBJ file ’%s’: %s", aPath, result.error.code.message().c_str());
 	// OBJ files can define faces that are not triangles. However, OpenGL will only render triangles (and lines
@@ -100,6 +115,11 @@ SimpleMeshData load_wavefront_obj(char const* aPath)
 				result.attributes.texcoords[idx.texcoord_index * 2 + 0],
 				result.attributes.texcoords[idx.texcoord_index * 2 + 1]
 				});
+			ret.normals.emplace_back(normalize(Vec3f{
+				result.attributes.normals[idx.normal_index * 2 + 0],
+				result.attributes.normals[idx.normal_index * 2 + 1],
+				result.attributes.normals[idx.normal_index * 2 + 2]
+				}));
 
 			// Always triangles, so we can find the face index by dividing the vertex index by three
 			auto const& mat = result.materials[shape.mesh.material_ids[i / 3]];

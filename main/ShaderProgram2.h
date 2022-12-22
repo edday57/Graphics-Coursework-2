@@ -28,6 +28,8 @@ public:
 	void setUniform(const GLchar* name, const Vec3f v);
 	void setUniform(const GLchar* name, const Vec4f v);
 	void setUniform(const GLchar* name, const Mat44f m);
+	void setUniform(const GLchar* name, const GLfloat& f);
+	void setUniformSampler(const GLchar* name, const GLint& slot);
 
 	GLuint getProgram()const;
 

@@ -131,3 +131,15 @@ void ShaderProgram2::setUniform(const GLchar* name, const Mat44f m)
 	GLint loc = getUniformLocation(name);
 	glUniformMatrix4fv(loc, 1, GL_TRUE, &m(0,0));
 }
+
+void ShaderProgram2::setUniform(const GLchar* name, const GLfloat& f)
+{
+	GLint loc = getUniformLocation(name);
+	glUniform1f(loc, f);
+}
+void ShaderProgram2::setUniformSampler(const GLchar* name, const GLint& slot)
+{
+	glActiveTexture(GL_TEXTURE0 + slot);
+	GLint loc = getUniformLocation(name);
+	glUniform1i(loc, slot);
+}

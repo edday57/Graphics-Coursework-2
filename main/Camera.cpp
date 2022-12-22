@@ -35,6 +35,10 @@ const Vec3f Camera::getUp() const
 {
 	return mUp;
 }
+const Vec3f Camera::getPos() const {
+	return mPosition;
+
+}
 
 //FPS Camera
 FPSCamera::FPSCamera(Vec3f position, float yaw, float pitch)
