@@ -80,7 +80,7 @@ const float MOUSE_SENSITIVITY = 0.25f;
 
 FPSCamera fpsCamera(Vec3f{ 0.0f, 0.0f, 5.0f });
 const double ZOOM_SENSITIVITY = -3.0;
-const double MOVE_SPEED = 5.0;
+double MOVE_SPEED = 5.0;
 const float MOUSE_SENSITIVITY_FPS = 0.1f;
 
 
@@ -166,7 +166,7 @@ int main() try
 	//texture[1].loadTexture("textures/crate.jpg", true);
 	texture[0].loadTexture("textures/watchtower.jpg", true);
 	texture[1].loadTexture("textures/cottage_diffuse.png", true);
-	texture[2].loadTexture("textures/diamondore.png", true);
+	texture[2].loadTexture("textures/crate.jpg", true);
 	texture[3].loadTexture("textures/woodcrate_diffuse.jpg", true);
 	texture[4].loadTexture("textures/crackedSand.jpg", true);
 	
@@ -248,7 +248,7 @@ int main() try
 
 		//FPS Cam
 		view = fpsCamera.getViewMatrix();
-		projection = make_perspective_projection(makeRadians(fpsCamera.getFOV()), fbwidth / float(fbheight), 0.1f, 100.0f);
+		projection = make_perspective_projection(makeRadians(fpsCamera.getFOV()), gWindowWidth / float(gWindowHeight), 0.1f, 100.0f);
 		
 		Vec3f viewPos;
 		viewPos.x= fpsCamera.getPos().x;
@@ -408,6 +408,24 @@ namespace
 			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getUp());
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getUp());
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+			
+			if (MOVE_SPEED == 10) {
+				MOVE_SPEED = 5;
+			}
+			else {
+				MOVE_SPEED = 10;
+			}
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+			if (MOVE_SPEED == 2.5) {
+				MOVE_SPEED = 5;
+			}
+			else {
+				MOVE_SPEED = 2.5;
+			}
+		}
+			
 	}
 
 	bool initOpenGL() {
