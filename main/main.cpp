@@ -234,6 +234,7 @@ int main() try
 			}
 			gWindowHeight = nheight;
 			gWindowWidth = nwidth;
+
 			glViewport( 0, 0, nwidth, nheight );
 		}
 	
