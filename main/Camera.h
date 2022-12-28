@@ -6,9 +6,6 @@ class Camera
 {
 public:
 	Mat44f getViewMatrix() const;
-	virtual void setPosition(const Vec3f position) {}
-	virtual void rotate(float yaw, float pitch) {} //in degrees
-	virtual void move (const Vec3f offsetPos) {}
 
 	const Vec3f getLook() const;
 	const Vec3f getRight() const;

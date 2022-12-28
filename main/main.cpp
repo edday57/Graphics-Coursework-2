@@ -30,9 +30,8 @@ namespace
 
 	void glfw_callback_key_( GLFWwindow*, int key, int scancode, int action, int mode);
 
-	void glfw_onMouseMove_(GLFWwindow* window, double posX, double posY);
 
-	void glfw_onMouseScroll_(GLFWwindow* window, double deltaX, double deltaY);
+	void glfw_onMouseScroll_(GLFWwindow* window2, double deltaX, double deltaY);
 
 	void update(double elapsedTime);
 
@@ -66,8 +65,8 @@ namespace
 
 }
 bool gWireframe = false;
-const int gWindowHeight = 720;
-const int gWindowWidth = 1280;
+int gWindowHeight = 720;
+int gWindowWidth = 1280;
 GLFWwindow* window = NULL;
 const std::string texture2File = "textures/crackedSand.jpg";
 const std::string texture1File = "textures/crate.jpg";
@@ -78,7 +77,7 @@ float gPitch = 0.0f;
 float gRadius = 10.0f;
 const float MOUSE_SENSITIVITY = 0.25f;
 
-FPSCamera fpsCamera(Vec3f{ 0.0f, 0.0f, 5.0f });
+FPSCamera fpsCamera(Vec3f{ 0.0f, 3.0f, 5.0f });
 const double ZOOM_SENSITIVITY = -3.0;
 double MOVE_SPEED = 5.0;
 const float MOUSE_SENSITIVITY_FPS = 0.1f;
@@ -132,7 +131,9 @@ int main() try
 		Vec3f{-10.5f,-.0f,-10.0f}, //house
 		Vec3f{-6.5f,-.0f,-5.5f}, //diamond ore
 		Vec3f{ 0.0f, -.0f, -2.0f }, //crate
-		Vec3f{ 0.0f, .0f, 0.0f } //floor
+		Vec3f{ 0.0f, .0f, 0.0f }, //floor
+		Vec3f{ -9.0f, .0f, -0.0f }, //barrel
+		Vec3f{ -0.0f, .0f, 8.0f },
 	};
 
 	//Model scale
@@ -141,7 +142,9 @@ int main() try
 		Vec3f{.6f, .6f, .6f}, //crate
 		Vec3f{1.f, 1.f, 1.f},  //diamond ore
 		Vec3f{1.f, 1.f, 1.f},
-		Vec3f{30.f, 1.f, 30.f} //floor
+		Vec3f{30.f, 1.f, 30.f}, //floor
+		Vec3f{0.7f, 0.7f, 0.7f},
+		Vec3f{1.2f, 1.2f, 1.2f},
 	};
 
 	Vec3f modelRotation[] = {
@@ -149,11 +152,13 @@ int main() try
 		Vec3f{0.0f, 32.0f, 0.0f}, //crate
 		Vec3f{0.0f, 34.0f, 0.0f},
 		Vec3f{0.0f, 0.0f, 0.0f},
-		Vec3f{0.0f, 0.0f, 0.0f}
+		Vec3f{0.0f, 0.0f, 0.0f},
+		Vec3f{ 0.0f, .0f, 0.0f },
+		Vec3f{ 0.0f, 180.0f, 0.0f },
 	};
 
 	//Load Meshes
-	const int numModels = 5;
+	const int numModels = 7;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels];
 	mesh[0].loadOBJ("models/watchtower.obj");
@@ -161,6 +166,8 @@ int main() try
 	mesh[2].loadOBJ("models/crate.obj");
 	mesh[3].loadOBJ("models/woodcrate.obj");
 	mesh[4].loadOBJ("models/floor.obj");
+	mesh[5].loadOBJ("models/barrel.obj");
+	mesh[6].loadOBJ("models/robot.obj");
 
 	//texture[0].loadTexture("textures/tank1.jpg", true);
 	//texture[1].loadTexture("textures/crate.jpg", true);
@@ -169,13 +176,15 @@ int main() try
 	texture[2].loadTexture("textures/crate.jpg", true);
 	texture[3].loadTexture("textures/woodcrate_diffuse.jpg", true);
 	texture[4].loadTexture("textures/crackedSand.jpg", true);
+	texture[5].loadTexture("textures/barrel_diffuse.png", true);
+	texture[6].loadTexture("textures/robot_diffuse.jpg", true);
 	
 
 	//Lighting
 	Mesh lightMesh;
 	lightMesh.loadOBJ("models/light.obj");
 	Vec3f lightPos = { -5.f, 5.5f, 2.f };
-	Vec3f lightCol = { 1.f, 1.f, 1.f };
+	Vec3f lightCol = { 0.8f, 0.8f, 0.65f };
 	Vec3f liightDirection = { 0.f, -0.9f, -0.17f };
 
 
@@ -223,8 +232,9 @@ int main() try
 					glfwGetFramebufferSize( window, &nwidth, &nheight );
 				} while( 0 == nwidth || 0 == nheight );
 			}
-
-			glViewport( 0, 0, iwidth, iheight );
+			gWindowHeight = nheight;
+			gWindowWidth = nwidth;
+			glViewport( 0, 0, nwidth, nheight );
 		}
 	
 		// Draw scene
@@ -263,7 +273,7 @@ int main() try
 		shaderProg.setUniform("projection", projection);
 		shaderProg.setUniform("viewPos", viewPos);
 
-		shaderProg.setUniform("light.ambient", Vec3f{0.5f,0.5f,0.5f});
+		shaderProg.setUniform("light.ambient", Vec3f{0.2f,0.2f,0.2f});
 		shaderProg.setUniform("light.diffuse", lightCol);
 		shaderProg.setUniform("light.specular", Vec3f{ .5f,0.5f,0.5f });
 		shaderProg.setUniform("light.position", lightPos);
@@ -277,10 +287,14 @@ int main() try
 			model = kIdentity44f * make_translation(modelPos[i]) * make_scaling(modelScale[i].x, modelScale[i].y, modelScale[i].z) * make_rotation_x(makeRadians(modelRotation[i].x)) * make_rotation_y(makeRadians(modelRotation[i].y)) * make_rotation_z(makeRadians(modelRotation[i].z));
 			shaderProg.setUniform("model", model);
 
-			shaderProg.setUniform("material.ambient", Vec3f{0.2f,0.2f,0.2f});
+			shaderProg.setUniform("material.ambient", Vec3f{0.4f,0.4f,0.4f});
 			shaderProg.setUniformSampler("material.diffuseMap", 0);
-			shaderProg.setUniform("material.specular", Vec3f{ 0.5f,0.5f,0.5f });
-			shaderProg.setUniform("material.shininess", 30.f);
+			shaderProg.setUniform("material.specular", Vec3f{ 0.1f,0.1f,0.1f });
+			shaderProg.setUniform("material.shininess", 10.f);
+			if (i > 4) {
+				shaderProg.setUniform("material.specular", Vec3f{ 0.8f,0.8f,0.7f });
+				shaderProg.setUniform("material.shininess", 60.f);
+			}
 			texture[i].bind(0);
 			mesh[i].draw();
 			texture[i].unbind(0);
@@ -355,28 +369,14 @@ namespace
 		}
 	}
 
-	void glfw_onMouseMove_(GLFWwindow* window, double posX, double posY)
-	{
-	//	static Vec2f lastMousePosition = Vec2f{ 0,0 };
-	//	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == 1)
-	//	{
-	//		gYaw -= ((float)posX - lastMousePosition.x) * MOUSE_SENSITIVITY;
-	//		gPitch += ((float)posY - lastMousePosition.y) * MOUSE_SENSITIVITY;
-	//	}
-	//	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == 1)
-	//	{
-	//		float dx = 0.01f * ((float)posX - lastMousePosition.x);
-	//		float dy = 0.01f * ((float)posY - lastMousePosition.y);
-	//		gRadius += dx - dy;
-	//	}
-	//	lastMousePosition.x = (float)posX;
-	//	lastMousePosition.y = (float)posY;
-	}
 
-	void glfw_onMouseScroll_(GLFWwindow* window, double deltaX, double deltaY)
+
+	void glfw_onMouseScroll_(GLFWwindow* window2, double deltaX, double deltaY)
 	{
-		double fov = fpsCamera.getFOV() + deltaY * ZOOM_SENSITIVITY;
-		fov = clamp(fov, 1.0, 120.0);
+		(void)deltaX;
+		(void)window2;
+		float fov = (float)fpsCamera.getFOV() + (float)deltaY * (float)ZOOM_SENSITIVITY;
+		fov = clamp(fov, 1.0f, 120.0f);
 		fpsCamera.setFOV((float)fov);
 	}
 
@@ -384,7 +384,6 @@ namespace
 	{
 		//Cam orientation
 		double mouseX, mouseY;
-
 		//Get current mouse position change
 		glfwGetCursorPos(window, &mouseX, &mouseY);
 
@@ -395,19 +394,19 @@ namespace
 	
 		//Forward/back
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getLook());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * fpsCamera.getLook());
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getLook());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * -fpsCamera.getLook());
 		//Left/right
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getRight());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * -fpsCamera.getRight());
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getRight());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * fpsCamera.getRight());
 		//Up/down
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getUp());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * fpsCamera.getUp());
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-			fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getUp());
+			fpsCamera.move((float)MOVE_SPEED * (float)elapsedTime * -fpsCamera.getUp());
 		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 			
 			if (MOVE_SPEED == 10) {
@@ -467,7 +466,6 @@ namespace
 
 		// Set up event handling
 		glfwSetKeyCallback(window, &glfw_callback_key_);
-		glfwSetCursorPosCallback(window, glfw_onMouseMove_);
 		glfwSetScrollCallback(window, &glfw_onMouseScroll_);
 
 		//Hide cursor, unlimited movement
