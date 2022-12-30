@@ -5,8 +5,6 @@
 #include <rapidobj/rapidobj.hpp>
 #include "../support/error.hpp"
 
-#include "ComplexObject.hpp"
-
 Mesh::Mesh()
 	:mLoaded(false)
 {
@@ -78,21 +76,6 @@ void Mesh::draw()
 
 	glBindVertexArray(mvao);
 	glDrawArrays(GL_TRIANGLES, 0, positions.size());
-	//glBindVertexArray(0);
-
-
-	auto fence = make_fence(3);
-	GLuint vao = create_vao(fence);
-	std::size_t vertexCount = fence.positions.size();
-
-	glBindVertexArray(vao);
-
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	// Draw triangles
-	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-	// Clean up global states
-	// Reset state
 	glBindVertexArray(0);
 }
 
