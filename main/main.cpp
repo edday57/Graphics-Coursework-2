@@ -21,7 +21,7 @@
 #include "ShaderProgram2.h"
 #include "Camera.h"
 #include "Mesh.h"
-#include "SimpleMesh.h"
+
 namespace
 {
 	constexpr char const* kWindowTitle = "COMP3811 - Coursework 2";
@@ -127,9 +127,9 @@ int main() try
 
 	//Model Positions
 	Vec3f modelPos[] = {
-		Vec3f{5.5f,-1.4f,-13.0f}, //tank
+		Vec3f{5.5f,-1.4f,-13.0f}, //watchtower
 		Vec3f{-10.5f,-.0f,-10.0f}, //house
-		Vec3f{-6.5f,-.0f,-5.5f}, //diamond ore
+		Vec3f{-6.5f,-.0f,-5.5f}, //
 		Vec3f{ 0.0f, -.0f, -2.0f }, //crate
 		Vec3f{ 0.0f, .0f, 0.0f }, //floor
 		Vec3f{ -9.0f, .0f, -0.0f }, //barrel
@@ -169,8 +169,6 @@ int main() try
 	mesh[5].loadOBJ("models/barrel.obj");
 	mesh[6].loadOBJ("models/robot.obj");
 
-	//texture[0].loadTexture("textures/tank1.jpg", true);
-	//texture[1].loadTexture("textures/crate.jpg", true);
 	texture[0].loadTexture("textures/watchtower.jpg", true);
 	texture[1].loadTexture("textures/cottage_diffuse.png", true);
 	texture[2].loadTexture("textures/crate.jpg", true);
@@ -196,9 +194,6 @@ int main() try
 
 	OGL_CHECKPOINT_ALWAYS();
 
-	//SimpleMeshData armadillo = load_wavefront_obj("assets/Armadillo.obj");
-	//GLuint vaoObj = create_vao(armadillo);
-	//std::size_t vertexCountObj = armadillo.positions.size();
 
 	// Main loop
 	while( !glfwWindowShouldClose( window ) )
@@ -247,13 +242,10 @@ int main() try
 
 		Mat44f model(kIdentity44f), view(kIdentity44f), projection(kIdentity44f);
 
+		//Orbit Cam - Optional
 		//orbitCam.setLookAt(cubePos);
 		//orbitCam.rotate(gYaw, gPitch);
 		//orbitCam.setRadius(gRadius);
-
-
-
-		//Orbit Cam
 		//view = orbitCam.getViewMatrix();
 		//projection = make_perspective_projection(makeRadians(45.0f), fbwidth / float(fbheight), 0.1f, 100.0f);
 
@@ -266,8 +258,8 @@ int main() try
 		viewPos.y = fpsCamera.getPos().y;
 		viewPos.z = fpsCamera.getPos().z;
 		viewPos = { 0.f,0.f,0.f };
+
 		//Use Shader
-		//glUseProgram(prog.programId());
 		shaderProg.use();
 		shaderProg.setUniform("model", model);
 		shaderProg.setUniform("view", view);
@@ -278,10 +270,7 @@ int main() try
 		shaderProg.setUniform("light.diffuse", lightCol);
 		shaderProg.setUniform("light.specular", Vec3f{ .5f,0.5f,0.5f });
 		shaderProg.setUniform("light.position", lightPos);
-		//glUniform1i(glGetUniformLocation(shaderProg.getProgram(), "myTexture"), 0);
-		//glUniform1i(glGetUniformLocation(shaderProg.getProgram(), "myTexture2"), 1);
-		//shaderProg.setUniform("vertColor", Vec4f{ 0.8f, 0.6f, 0.2f, 1.0f });
-		
+
 
 		//Model loading
 		for (int i = 0; i < numModels; i++) {
@@ -302,8 +291,7 @@ int main() try
 		}
 		
 
-
-
+		//Add Light source
 		model = kIdentity44f * make_translation(lightPos);
 		lightProg.use();
 		lightProg.setUniform("lightColor", lightCol);
@@ -311,14 +299,6 @@ int main() try
 		lightProg.setUniform("model", model);
 		lightProg.setUniform("projection", projection);
 		lightMesh.draw();
-
-
-
-		//texture[2].bind(0);
-		//model = kIdentity44f;
-		//glBindVertexArray(vaoObj);
-		//glDrawArrays(GL_TRIANGLES, 0, vertexCountObj);
-		//texture[2].unbind(0);
 
 
 		glUseProgram(0);
@@ -417,6 +397,7 @@ namespace
 				MOVE_SPEED = 10;
 			}
 		}
+		//Movement speed
 		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
 			if (MOVE_SPEED == 2.5) {
 				MOVE_SPEED = 5;
@@ -431,11 +412,8 @@ namespace
 	bool initOpenGL() {
 		glfwSetErrorCallback(&glfw_callback_error_);
 
-		//glfwWindowHint( GLFW_SRGB_CAPABLE, GLFW_TRUE );
-		//glfwWindowHint( GLFW_DOUBLEBUFFER, GLFW_TRUE );
 
-		//glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
-
+		glfwWindowHint( GLFW_DOUBLEBUFFER, GLFW_TRUE );
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);

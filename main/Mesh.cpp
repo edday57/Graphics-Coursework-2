@@ -13,6 +13,7 @@ Mesh::Mesh()
 
 Mesh::~Mesh() 
 {
+	//Destructor Method
 	glDeleteVertexArrays(1, &mvao);
 	glDeleteBuffers(1, &mvbo);
 	glDeleteBuffers(1, &mvbocol);
@@ -84,23 +85,19 @@ void Mesh::initBuffers() {
 	glGenBuffers(1, &mvbo);
 	glBindBuffer(GL_ARRAY_BUFFER, mvbo);
 	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(Vec3f), positions.data(), GL_STATIC_DRAW);
-
+	//Color
 	glGenBuffers(1, &mvbocol);
 	glBindBuffer(GL_ARRAY_BUFFER, mvbocol);
 	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(Vec3f), colors.data(), GL_STATIC_DRAW);
-
+	//Texture
 	glGenBuffers(1, &mvbotex);
 	glBindBuffer(GL_ARRAY_BUFFER, mvbotex);
 	glBufferData(GL_ARRAY_BUFFER, textures.size() * sizeof(Vec2f), textures.data(), GL_STATIC_DRAW);
-
+	//Normal
 	glGenBuffers(1, &mvbonormal);
 	glBindBuffer(GL_ARRAY_BUFFER, mvbonormal);
 	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vec3f), normals.data(), GL_STATIC_DRAW);
 
-
-	//glGenBuffers(1, &vbo2); //create buffer
-	//glBindBuffer(GL_ARRAY_BUFFER, vbo2); // bind buffer
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_color), vertex_color, GL_STATIC_DRAW); //Move to GPU
 
 	glGenVertexArrays(1, &mvao); //create vao
 	glBindVertexArray(mvao); //bind vao
@@ -120,6 +117,7 @@ void Mesh::initBuffers() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(2);
 
+	//Normal
 	glBindBuffer(GL_ARRAY_BUFFER, mvbonormal);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(3);

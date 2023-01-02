@@ -14,18 +14,20 @@ SimpleMeshData concatenate(SimpleMeshData aM, SimpleMeshData const& aN)
 GLuint create_vao(SimpleMeshData aMeshData)
 {
 
+	//Configure buffers
+	//positions
 	glGenBuffers(1, &(aMeshData.mvbo));
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbo);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.positions.size() * sizeof(Vec3f), aMeshData.positions.data(), GL_STATIC_DRAW);
-
+	//colors
 	glGenBuffers(1, &(aMeshData.mvbocol));
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbocol);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.colors.size() * sizeof(Vec3f), aMeshData.colors.data(), GL_STATIC_DRAW);
-
+	//normals
 	glGenBuffers(1, &(aMeshData.mvbonormal));
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbonormal);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.normals.size() * sizeof(Vec3f), aMeshData.normals.data(), GL_STATIC_DRAW);
-
+	//textures
 	glGenBuffers(1, &(aMeshData.mvbotex));
 	glBindBuffer(GL_ARRAY_BUFFER, aMeshData.mvbotex);
 	glBufferData(GL_ARRAY_BUFFER, aMeshData.textures.size() * sizeof(Vec2f), aMeshData.textures.data(), GL_STATIC_DRAW);
